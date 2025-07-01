@@ -28,6 +28,19 @@ if f"{SESSION_NAME}.session" not in os.listdir():
 
 client = TelegramClient(SESSION_NAME, API_ID, API_HASH)
 seen_links = set()
+comment_index = 0
+comments = [
+    "Mainet just different 🫡",
+    "We rise together 🚀",
+    "United we grow 🤝",
+    "This is how we shine 🌟",
+    "One team. One vibe.",
+    "Let the world see us 🌍",
+    "Stronger every step",
+    "Never not supporting",
+    "This fam always shows up",
+    "Let’s light it up again 🔥"
+]
 
 # ─────────────────────────────
 # ✅ Flask Setup (for uptime pings)
@@ -48,10 +61,11 @@ def run_flask():
     app.run(host="0.0.0.0", port=8080)
 
 # ─────────────────────────────
-# ✅ Message Handler
+# ✅ Button Clicker Handler
 # ─────────────────────────────
 @client.on(events.NewMessage(chats='mainet_community'))
 async def handler(event):
+    global comment_index
     message = event.message
     text = message.message or ""
 
@@ -60,9 +74,7 @@ async def handler(event):
         if not buttons:
             return
 
-        # Flatten buttons from 2D list to 1D
         flat_buttons = [btn for row in buttons for btn in row]
-
     except Exception as e:
         logger.warning(f"[x] Could not fetch buttons: {e}")
         return
@@ -80,13 +92,27 @@ async def handler(event):
         seen_links.add(tweet_url)
 
     await asyncio.sleep(random.randint(6, 12))
-
     try:
-        # ✅ Corrected positional argument (no keyword)
         await message.click(len(flat_buttons) - 1)
         logger.info(f"[✓] Clicked last button: {tweet_url or 'No link'}")
     except Exception as e:
         logger.error(f"[x] Failed to click button: {e}")
+
+# ─────────────────────────────
+# ✅ Reply Handler for RaidarBot
+# ─────────────────────────────
+@client.on(events.NewMessage(from_users='RaidarRobot'))
+async def reply_to_raidar(event):
+    global comment_index
+    if 'Please reply to this message' in event.raw_text:
+        await asyncio.sleep(random.randint(5, 10))
+        comment = comments[comment_index]
+        try:
+            await client.send_message(entity=event.chat_id, message=comment, reply_to=event.id)
+            logger.info(f"[✓] Replied to Raidar message with: {comment}")
+            comment_index = (comment_index + 1) % len(comments)
+        except Exception as e:
+            logger.error(f"[x] Failed to reply to Raidar message: {e}")
 
 # ─────────────────────────────
 # ✅ Main Entrypoint
@@ -97,11 +123,11 @@ async def main():
         logger.error("❌ Not authorized. Please re-login.")
         return
 
-    logger.info("🤖 SmashBot is live and monitoring 'testingbothu' for raid buttons...")
+    logger.info("🤖 SmashBot is live and monitoring 'mainet_community' and RaidarBot...")
     await client.run_until_disconnected()
 
 # ─────────────────────────────
-# ✅ Run Both Flask and Bot
+# ✅ Run Flask + Bot
 # ─────────────────────────────
 if __name__ == "__main__":
     threading.Thread(target=run_flask).start()
