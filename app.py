@@ -32,15 +32,16 @@ comment_index = 0
 comments = [
     "Mainet heat is rising 🔥",
     "Rolling deep with the fam ",
-    "We’re built different ,
+    "We’re built different ",
     "Nothing but forward motion ",
     "Locked in, tuned up ",
     "Posting with purpose ",
     "Waves don’t stop here ",
-    "Momentum feels unreal ⚙",
+    "Momentum feels unreal ",
     "Eyes on the timeline ",
     "Mainet heartbeat never fades "
 ]
+
 
 # ─────────────────────────────
 # ✅ Flask Setup (for uptime pings)
